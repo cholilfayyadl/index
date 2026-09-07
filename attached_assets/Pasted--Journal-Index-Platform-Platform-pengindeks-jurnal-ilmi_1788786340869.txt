@@ -1,0 +1,267 @@
+# Journal Index Platform
+
+Platform pengindeks jurnal ilmiah yang terinspirasi dari **Scopus** dan **Web of Science (WoS)**. Platform ini menyediakan metrik kualitas jurnal seperti **SJR (SCImago Journal Rank)** dan **Impact Factor**, serta alur pendaftaran indexing jurnal yang mengikuti model WoS — publisher mendaftar akun terlebih dahulu melalui **Publisher Portal**, baru kemudian dapat mengajukan permohonan indexing untuk jurnal yang mereka kelola.
+
+---
+
+## Daftar Isi
+
+- [Tentang Proyek](#tentang-proyek)
+- [Fitur Utama](#fitur-utama)
+- [Alur Pendaftaran & Indexing](#alur-pendaftaran--indexing)
+- [Metrik Jurnal](#metrik-jurnal)
+- [Peran Pengguna](#peran-pengguna)
+- [Arsitektur Sistem](#arsitektur-sistem)
+- [Struktur Proyek](#struktur-proyek)
+- [Instalasi](#instalasi)
+- [Konfigurasi Environment](#konfigurasi-environment)
+- [Menjalankan Aplikasi](#menjalankan-aplikasi)
+- [Roadmap](#roadmap)
+- [Kontribusi](#kontribusi)
+- [Lisensi](#lisensi)
+
+---
+
+## Tentang Proyek
+
+Proyek ini bertujuan membangun sistem index jurnal yang dapat:
+
+1. Menampilkan daftar jurnal terindeks lengkap dengan metrik kualitas (SJR, Impact Factor, Quartile, H-Index, dll).
+2. Memungkinkan **publisher** mendaftarkan akun dan mengajukan jurnal mereka untuk dievaluasi dan diindeks.
+3. Menyediakan proses evaluasi/review internal (seperti proses seleksi WoS) sebelum sebuah jurnal resmi masuk ke dalam index.
+4. Menjadi rujukan bagi peneliti untuk mengecek kredibilitas dan reputasi sebuah jurnal.
+
+---
+
+## Fitur Utama
+
+- 🔍 **Pencarian & Direktori Jurnal** — cari jurnal berdasarkan nama, ISSN, subjek, penerbit, atau negara.
+- 📊 **Metrik Jurnal** — tampilkan SJR, Impact Factor (JIF), Quartile (Q1–Q4), H-Index, dan tren metrik per tahun.
+- 🏢 **Publisher Portal** — portal khusus publisher untuk registrasi akun, manajemen profil, dan manajemen jurnal.
+- 📝 **Pengajuan Indexing (Submission for Indexing)** — publisher dapat mengajukan jurnal baru untuk dievaluasi tim index, mirip proses *"Suggest a Journal"* di WoS.
+- ✅ **Proses Evaluasi/Review** — admin/tim editorial melakukan penilaian terhadap kelayakan jurnal (kriteria: kualitas editorial, etika publikasi, keteraturan terbit, dsb).
+- 📈 **Dashboard Publisher** — status pengajuan (submitted, under review, accepted, rejected), riwayat jurnal, dan statistik metrik.
+- 🔐 **Autentikasi & Otorisasi** — role-based access (Publisher, Admin/Editor, Public User).
+- 🌐 **Halaman Publik Jurnal** — profil jurnal publik lengkap dengan metrik historis dan cakupan (coverage).
+
+---
+
+## Alur Pendaftaran & Indexing
+
+Alur ini mengikuti pola registrasi dan pengajuan seperti pada Web of Science:
+
+```
+1. Publisher membuat akun di Publisher Portal
+        │
+        ▼
+2. Verifikasi akun (email/admin approval)
+        │
+        ▼
+3. Publisher melengkapi profil penerbit
+        │
+        ▼
+4. Publisher mengajukan jurnal untuk diindeks
+   (isi metadata: nama jurnal, ISSN, cakupan subjek,
+    frekuensi terbit, tautan jurnal, dokumen pendukung)
+        │
+        ▼
+5. Tim index melakukan evaluasi kelayakan
+        │
+        ├─── Ditolak → publisher menerima catatan evaluasi
+        │
+        ▼
+6. Jurnal diterima & masuk proses indexing
+        │
+        ▼
+7. Jurnal tampil di direktori publik dengan metrik awal
+        │
+        ▼
+8. Metrik (SJR, Impact Factor) diperbarui secara berkala
+   berdasarkan data sitasi
+```
+
+### Detail Tahapan
+
+| Tahap | Deskripsi |
+|---|---|
+| **Registrasi Akun Publisher** | Publisher mendaftar melalui Publisher Portal dengan data institusi/penerbit. |
+| **Verifikasi** | Admin memverifikasi keabsahan akun publisher sebelum diberi akses penuh. |
+| **Pengajuan Jurnal (Suggest Journal for Indexing)** | Publisher mengisi formulir pengajuan berisi metadata jurnal lengkap. |
+| **Review/Evaluasi** | Tim editorial index menilai berdasarkan kriteria kualitas dan etika publikasi. |
+| **Keputusan** | Jurnal diterima (masuk index) atau ditolak (dengan catatan revisi). |
+| **Publikasi Index** | Jurnal yang diterima tampil di direktori dan mulai dihitung metriknya. |
+
+---
+
+## Metrik Jurnal
+
+Platform ini menghitung/menampilkan metrik berikut untuk setiap jurnal terindeks:
+
+- **SJR (SCImago Journal Rank)** — mengukur pengaruh ilmiah jurnal berdasarkan jumlah sitasi dan prestise sumber sitasi.
+- **Impact Factor (IF)** — rata-rata jumlah sitasi per artikel dalam periode tertentu (umumnya 2 tahun terakhir).
+- **Quartile (Q1–Q4)** — pemeringkatan jurnal dalam kategori subjeknya berdasarkan SJR/IF.
+- **H-Index** — mengukur produktivitas dan dampak sitasi jurnal.
+- **Cite Score** (opsional) — rata-rata sitasi terhadap dokumen yang terbit dalam 4 tahun terakhir.
+
+> Catatan: Perhitungan metrik dapat dilakukan secara internal (berdasarkan data sitasi yang dikumpulkan platform) atau mengambil dari sumber data eksternal (API pihak ketiga), tergantung kebutuhan proyek.
+
+---
+
+## Peran Pengguna
+
+| Role | Hak Akses |
+|---|---|
+| **Public User** | Melihat direktori jurnal, profil jurnal, dan metrik publik. |
+| **Publisher** | Registrasi & login di Publisher Portal, mengelola profil penerbit, mengajukan jurnal untuk indexing, memantau status pengajuan. |
+| **Admin/Editor** | Meninjau dan mengevaluasi pengajuan jurnal, mengelola/memperbarui metrik, mengelola akun publisher. |
+| **Super Admin** | Mengatur konfigurasi sistem, role, dan kebijakan kriteria indexing. |
+
+---
+
+## Arsitektur Sistem
+
+```
+┌─────────────────────┐      ┌──────────────────────┐
+│   Public Website     │      │   Publisher Portal    │
+│  (Direktori & Profil  │      │ (Registrasi, Submission│
+│   Jurnal + Metrik)    │      │  jurnal, Dashboard)    │
+└──────────┬───────────┘      └───────────┬───────────┘
+           │                              │
+           └──────────────┬───────────────┘
+                           ▼
+                 ┌───────────────────┐
+                 │     Backend API    │
+                 │ (Auth, Journal,     │
+                 │  Submission, Metric)│
+                 └─────────┬──────────┘
+                           ▼
+                 ┌───────────────────┐
+                 │      Database      │
+                 │ (Journals, Users,   │
+                 │  Submissions,       │
+                 │  Metrics History)   │
+                 └─────────┬──────────┘
+                           ▼
+                 ┌───────────────────┐
+                 │  Admin/Editor Panel │
+                 │ (Review & Evaluasi) │
+                 └───────────────────┘
+```
+
+---
+
+## Struktur Proyek
+
+```
+.
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── models/
+│   │   │   ├── journal.js
+│   │   │   ├── publisher.js
+│   │   │   ├── submission.js
+│   │   │   └── metric.js
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── middlewares/
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── public/          # Direktori & profil jurnal
+│   │   │   └── publisher-portal/ # Registrasi, login, submission
+│   │   ├── components/
+│   │   └── services/
+│   └── package.json
+│
+├── docs/
+│   └── indexing-criteria.md      # Kriteria evaluasi jurnal
+│
+└── README.md
+```
+
+> Struktur di atas adalah contoh/template — sesuaikan dengan stack teknologi yang dipakai.
+
+---
+
+## Instalasi
+
+```bash
+# Clone repository
+git clone https://github.com/username/journal-index-platform.git
+cd journal-index-platform
+
+# Install dependency backend
+cd backend
+npm install
+
+# Install dependency frontend
+cd ../frontend
+npm install
+```
+
+---
+
+## Konfigurasi Environment
+
+Buat file `.env` pada folder `backend/` dengan contoh isi berikut:
+
+```env
+PORT=5000
+DATABASE_URL=postgres://user:password@localhost:5432/journal_index
+JWT_SECRET=your_jwt_secret
+MAIL_SERVICE_API_KEY=your_mail_api_key
+```
+
+---
+
+## Menjalankan Aplikasi
+
+```bash
+# Menjalankan backend
+cd backend
+npm run dev
+
+# Menjalankan frontend
+cd frontend
+npm run dev
+```
+
+Akses aplikasi:
+- Website publik: `http://localhost:3000`
+- Publisher Portal: `http://localhost:3000/publisher-portal`
+- Admin Panel: `http://localhost:3000/admin`
+
+---
+
+## Roadmap
+
+- [ ] Modul registrasi & verifikasi akun publisher
+- [ ] Form pengajuan jurnal (submission for indexing)
+- [ ] Sistem review/evaluasi oleh admin
+- [ ] Perhitungan & penyajian metrik (SJR, Impact Factor)
+- [ ] Direktori jurnal publik dengan pencarian & filter
+- [ ] Dashboard publisher (status pengajuan, riwayat jurnal)
+- [ ] Notifikasi email (status pengajuan, hasil evaluasi)
+- [ ] Ekspor data metrik (CSV/PDF)
+- [ ] Integrasi API sitasi eksternal (opsional)
+
+---
+
+## Kontribusi
+
+Kontribusi sangat terbuka! Silakan buat *issue* atau *pull request* untuk perbaikan, fitur baru, atau laporan bug.
+
+1. Fork repository ini
+2. Buat branch baru (`git checkout -b fitur-baru`)
+3. Commit perubahan (`git commit -m 'Menambahkan fitur X'`)
+4. Push ke branch (`git push origin fitur-baru`)
+5. Buat Pull Request
+
+---
+
+## Lisensi
+
+Proyek ini dilisensikan di bawah [MIT License](LICENSE).
