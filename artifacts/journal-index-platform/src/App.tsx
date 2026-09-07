@@ -17,6 +17,8 @@ type Manuscript = {
   title: string;
   authors: string;
   year: string;
+  volume: string;
+  issue: string;
   type: string;
   citations: number;
 };
@@ -37,9 +39,9 @@ const countries = ['All countries', 'Indonesia', 'United Kingdom', 'Netherlands'
 
 const manuscriptsByJournal: Record<string, Manuscript[]> = {
   rse: [
-    { title: 'Grid-forming battery storage for resilient islanded microgrids', authors: 'M. Sørensen, A. Rahman, L. Chen', year: '2024', type: 'Research article', citations: 24 },
-    { title: 'Policy pathways for an equitable renewable energy transition', authors: 'E. van Dijk, N. Prasetyo, J. Williams', year: '2024', type: 'Review article', citations: 18 },
-    { title: 'Community-scale flexibility in distributed energy systems', authors: 'S. Jensen, K. Adeyemi, P. Novak', year: '2023', type: 'Research article', citations: 31 },
+    { title: 'Grid-forming battery storage for resilient islanded microgrids', authors: 'M. Sørensen, A. Rahman, L. Chen', year: '2024', volume: '1', issue: '1', type: 'Research article', citations: 24 },
+    { title: 'Policy pathways for an equitable renewable energy transition', authors: 'E. van Dijk, N. Prasetyo, J. Williams', year: '2024', volume: '1', issue: '1', type: 'Review article', citations: 18 },
+    { title: 'Community-scale flexibility in distributed energy systems', authors: 'S. Jensen, K. Adeyemi, P. Novak', year: '2023', volume: '1', issue: '1', type: 'Research article', citations: 31 },
   ],
 };
 
@@ -174,12 +176,12 @@ function HistoryChart({ history }: { history: Journal['history'] }) {
 
 function ManuscriptList({ journal }: { journal: Journal }) {
   const manuscripts = manuscriptsByJournal[journal.id] ?? [
-    { title: `${journal.subjects[0]} perspectives in ${journal.title}`, authors: `Editorial record · ${journal.publisher}`, year: '2024', type: 'Research article', citations: 12 },
-    { title: `Recent advances in ${journal.subjects.join(' and ').toLowerCase()}`, authors: `Research contributors · ${journal.country}`, year: '2023', type: 'Review article', citations: 9 },
-    { title: `Methods and evidence for contemporary ${journal.subjects[0].toLowerCase()} research`, authors: 'Indexed contributors', year: '2023', type: 'Research article', citations: 7 },
+    { title: `${journal.subjects[0]} perspectives in ${journal.title}`, authors: `Editorial record · ${journal.publisher}`, year: '2024', volume: '1', issue: '1', type: 'Research article', citations: 12 },
+    { title: `Recent advances in ${journal.subjects.join(' and ').toLowerCase()}`, authors: `Research contributors · ${journal.country}`, year: '2023', volume: '1', issue: '1', type: 'Review article', citations: 9 },
+    { title: `Methods and evidence for contemporary ${journal.subjects[0].toLowerCase()} research`, authors: 'Indexed contributors', year: '2023', volume: '1', issue: '1', type: 'Research article', citations: 7 },
   ];
 
-  return <section className="mt-10 border-t border-[#dfe5ee] pt-8"><div className="flex items-end justify-between gap-4"><div><div className="ji-kicker mono text-[10px] uppercase tracking-[.15em]">Indexed publications</div><h2 className="ji-heading mt-2 text-2xl font-semibold">Journal manuscripts</h2></div><span className="ji-muted text-[11px]">{manuscripts.length} records</span></div><div className="ji-card mt-5 divide-y divide-[#dfe5ee]">{manuscripts.map(manuscript => <article key={manuscript.title} className="p-5 transition hover:bg-[#f6f9ff]"><div className="min-w-0"><h3 className="ji-heading text-[15px] font-semibold leading-6">{manuscript.title}</h3><p className="ji-muted mt-2 text-[12px]">{manuscript.authors}</p><div className="ji-muted mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] uppercase tracking-[.11em]"><span>{manuscript.type} {manuscript.year}</span><span aria-hidden="true">|</span><span>{manuscript.citations} Citations</span></div></div></article>)}</div></section>;
+  return <section className="mt-10 border-t border-[#dfe5ee] pt-8"><div className="flex items-end justify-between gap-4"><div><div className="ji-kicker mono text-[10px] uppercase tracking-[.15em]">Indexed publications</div><h2 className="ji-heading mt-2 text-2xl font-semibold">Journal manuscripts</h2></div><span className="ji-muted text-[11px]">{manuscripts.length} records</span></div><div className="ji-card mt-5 divide-y divide-[#dfe5ee]">{manuscripts.map(manuscript => <article key={manuscript.title} className="p-5 transition hover:bg-[#f6f9ff]"><div className="min-w-0"><h3 className="ji-heading text-[15px] font-semibold leading-6">{manuscript.title}</h3><p className="ji-muted mt-2 text-[12px]">{manuscript.authors}</p><div className="ji-muted mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] tracking-[.08em]"><span>{manuscript.type}</span><span aria-hidden="true">|</span><span>Vol {manuscript.volume}, Issue {manuscript.issue} {manuscript.year}</span><span aria-hidden="true">|</span><span>{manuscript.citations} Citations.</span></div></div></article>)}</div></section>;
 }
 
 function Profile({ saved, onSave }: { saved: string[]; onSave: (id: string) => void }) {
