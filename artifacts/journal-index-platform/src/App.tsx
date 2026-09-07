@@ -1,7 +1,7 @@
 import { type ChangeEvent, type FormEvent, type ReactNode, useMemo, useState } from 'react';
 import {
   ArrowRight, Award, Building2, Check, ChevronDown, ChevronRight, Clock3, Globe2,
-  Heart, Info, Library, Menu, Search, Send, ShieldCheck, SlidersHorizontal,
+  FileText, Heart, Info, Library, Menu, Search, Send, ShieldCheck, SlidersHorizontal,
   TrendingUp, X,
 } from 'lucide-react';
 import { Link, Route, Switch, useLocation, useParams, Router as WouterRouter } from 'wouter';
@@ -11,6 +11,14 @@ type Journal = {
   subjects: string[]; quartile: string; sjr: string; impact: string; hIndex: number; citeScore: string;
   description: string; founded: string; frequency: string; openAccess: boolean;
   history: { year: string; sjr: number; impact: number }[];
+};
+
+type Manuscript = {
+  title: string;
+  authors: string;
+  year: string;
+  type: string;
+  citations: number;
 };
 
 const journals: Journal[] = [
@@ -26,6 +34,14 @@ const journals: Journal[] = [
 
 const subjects = ['All subjects', 'Computer Science', 'Medicine', 'Economics', 'Business', 'Energy', 'Social Sciences', 'Education', 'Arts & Humanities'];
 const countries = ['All countries', 'Indonesia', 'United Kingdom', 'Netherlands', 'Denmark', 'United States', 'Singapore'];
+
+const manuscriptsByJournal: Record<string, Manuscript[]> = {
+  rse: [
+    { title: 'Grid-forming battery storage for resilient islanded microgrids', authors: 'M. Sørensen, A. Rahman, L. Chen', year: '2024', type: 'Research article', citations: 24 },
+    { title: 'Policy pathways for an equitable renewable energy transition', authors: 'E. van Dijk, N. Prasetyo, J. Williams', year: '2024', type: 'Review article', citations: 18 },
+    { title: 'Community-scale flexibility in distributed energy systems', authors: 'S. Jensen, K. Adeyemi, P. Novak', year: '2023', type: 'Research article', citations: 31 },
+  ],
+};
 
 function Logo() {
   return <Link href="/" className="flex items-center gap-2.5" data-testid="link-brand">
@@ -156,6 +172,16 @@ function HistoryChart({ history }: { history: Journal['history'] }) {
   return <div className="mt-6"><div className="flex h-48 items-end gap-3 border-b border-l border-[#d9e2ee] px-2 pt-5 sm:gap-6">{history.map(h => <div key={h.year} className="flex h-full flex-1 flex-col justify-end gap-2"><div className="relative flex flex-1 items-end"><div className="w-full bg-[#5f8de1] transition hover:bg-[#2557d6]" style={{ height: `${(h.impact / max) * 100}%` }}><span className="ji-heading absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-semibold">{h.impact}</span></div></div><span className="mono ji-muted text-[10px]">{h.year}</span></div>)}</div><div className="ji-muted mt-4 flex items-center gap-5 text-[11px]"><span className="flex items-center gap-2"><i className="h-2 w-2 bg-[#5f8de1]" /> Impact factor</span><span className="flex items-center gap-2"><span className="h-px w-4 bg-[#e56a2e]" /> SJR tracked annually</span></div></div>;
 }
 
+function ManuscriptList({ journal }: { journal: Journal }) {
+  const manuscripts = manuscriptsByJournal[journal.id] ?? [
+    { title: `${journal.subjects[0]} perspectives in ${journal.title}`, authors: `Editorial record · ${journal.publisher}`, year: '2024', type: 'Research article', citations: 12 },
+    { title: `Recent advances in ${journal.subjects.join(' and ').toLowerCase()}`, authors: `Research contributors · ${journal.country}`, year: '2023', type: 'Review article', citations: 9 },
+    { title: `Methods and evidence for contemporary ${journal.subjects[0].toLowerCase()} research`, authors: 'Indexed contributors', year: '2023', type: 'Research article', citations: 7 },
+  ];
+
+  return <section className="mt-10 border-t border-[#dfe5ee] pt-8"><div className="flex items-end justify-between gap-4"><div><div className="ji-kicker mono text-[10px] uppercase tracking-[.15em]">Indexed publications</div><h2 className="ji-heading mt-2 text-2xl font-semibold">Journal manuscripts</h2></div><span className="ji-muted text-[11px]">{manuscripts.length} records</span></div><div className="ji-card mt-5 divide-y divide-[#dfe5ee] border">{manuscripts.map((manuscript, index) => <article key={manuscript.title} className="p-5 transition hover:bg-[#f6f9ff]"><div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div className="flex min-w-0 gap-4"><span className="ji-orange mono pt-0.5 text-[10px]">0{index + 1}</span><div className="min-w-0"><h3 className="ji-heading text-[15px] font-semibold leading-6">{manuscript.title}</h3><p className="ji-muted mt-2 text-[12px]">{manuscript.authors}</p><div className="ji-muted mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[10px] uppercase tracking-[.11em]"><span>{manuscript.type}</span><span>{manuscript.year}</span></div></div></div><div className="shrink-0 text-left sm:text-right"><div className="ji-heading text-[18px] font-semibold">{manuscript.citations}</div><div className="ji-muted text-[10px] uppercase tracking-[.11em]">Citations</div></div></div></article>)}</div></section>;
+}
+
 function Profile({ saved, onSave }: { saved: string[]; onSave: (id: string) => void }) {
   const { id } = useParams<{ id: string }>();
   const journal = journals.find(item => item.id === id);
@@ -163,7 +189,7 @@ function Profile({ saved, onSave }: { saved: string[]; onSave: (id: string) => v
   return <Shell savedCount={saved.length}><main className="mx-auto max-w-[1240px] px-5 pb-20 pt-10 lg:px-8 lg:pt-12">
     <div className="ji-muted flex items-center gap-2 text-[11px]"><Link href="/journals" className="ji-link hover:underline" data-testid="link-profile-directory">Directory</Link><ChevronRight size={13} /><span>{journal.abbreviation}</span></div>
     <section className="mt-6 border-b border-[#dfe5ee] pb-8"><div className="flex flex-col gap-7 md:flex-row md:items-start md:justify-between"><div className="max-w-3xl"><h1 className="ji-heading text-4xl font-semibold leading-tight tracking-[-.04em] sm:text-5xl">{journal.title}</h1><div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]"><Pill tone="blue">Indexed record</Pill><Pill>{journal.quartile} · 2024</Pill>{journal.openAccess && <Pill tone="green">Open access</Pill>}</div><p className="ji-muted mt-5 max-w-2xl text-[14px] leading-6">{journal.description}</p></div><button onClick={() => onSave(journal.id)} className={`flex w-fit items-center gap-2 rounded-sm border px-4 py-2.5 text-[12px] font-semibold transition ${saved.includes(journal.id) ? 'status-orange border-[#f3c5a8]' : 'ji-outline border hover:bg-[#edf3ff]'}`} data-testid="button-profile-save"><Heart size={15} fill={saved.includes(journal.id) ? 'currentColor' : 'none'} /> {saved.includes(journal.id) ? 'Saved to shortlist' : 'Save journal'}</button></div><div className="mt-7 border-t border-[#dfe5ee] pt-6"><div className="ji-heading flex items-center gap-2 text-[13px] font-semibold"><Award size={16} className="ji-orange" /> Subject coverage</div><div className="mt-3 flex flex-wrap gap-2">{journal.subjects.map(s => <Pill key={s} tone="blue">{s}</Pill>)}</div></div><div className="ji-panel-blue mt-7 border p-5"><div className="ji-heading flex items-center gap-2 text-[12px] font-bold uppercase tracking-[.1em]"><Info size={15} className="ji-orange" /> Summary journal</div><div className="mt-5 grid gap-5 border-t border-[#cddcf4] pt-5 sm:grid-cols-2"><div><div className="mono ji-muted text-[10px] uppercase tracking-[.13em]">Publisher</div><div className="ji-heading mt-2 text-[13px] font-semibold">{journal.publisher}</div></div><div><div className="mono ji-muted text-[10px] uppercase tracking-[.13em]">Country</div><div className="ji-heading mt-2 text-[13px] font-semibold">{journal.country}</div></div><div><div className="mono ji-muted text-[10px] uppercase tracking-[.13em]">ISSN</div><div className="ji-heading mt-2 text-[13px] font-semibold">{journal.issn || '-'}</div></div><div><div className="mono ji-muted text-[10px] uppercase tracking-[.13em]">E-ISSN</div><div className="ji-heading mt-2 text-[13px] font-semibold">{journal.eIssn || '-'}</div></div><div><div className="mono ji-muted text-[10px] uppercase tracking-[.13em]">Founded</div><div className="ji-heading mt-2 text-[13px] font-semibold">{journal.founded}</div></div><div><div className="mono ji-muted text-[10px] uppercase tracking-[.13em]">Frequency</div><div className="ji-heading mt-2 text-[13px] font-semibold">{journal.frequency}</div></div><div className="sm:col-span-2"><div className="mono ji-muted text-[10px] uppercase tracking-[.13em]">Subject</div><div className="ji-heading mt-2 text-[13px] font-semibold">{journal.subjects.join(' · ')}</div></div></div></div></section>
-    <section className="py-9"><div><div className="grid grid-cols-2 gap-x-8 gap-y-8 border-b border-[#dfe5ee] pb-9 sm:grid-cols-4"><Metric label="SJR" value={journal.sjr} note="SCImago Journal Rank" /><Metric label="Impact factor" value={journal.impact} note="2024 edition" /><Metric label="H-index" value={String(journal.hIndex)} note="Citedness over time" /><Metric label="CiteScore" value={journal.citeScore} note="Scopus 2024" /></div><div className="pt-9"><div className="flex items-end justify-between"><div><div className="ji-kicker mono text-[10px] uppercase tracking-[.15em]">Five-year view</div><h2 className="ji-heading mt-2 text-2xl font-semibold">Metric history</h2></div><span className="ji-muted text-[11px]">2020 — 2024</span></div><HistoryChart history={journal.history} /></div></div></section>
+    <section className="py-9"><div><div className="grid grid-cols-2 gap-x-8 gap-y-8 border-b border-[#dfe5ee] pb-9 sm:grid-cols-4"><Metric label="SJR" value={journal.sjr} note="SCImago Journal Rank" /><Metric label="Impact factor" value={journal.impact} note="2024 edition" /><Metric label="H-index" value={String(journal.hIndex)} note="Citedness over time" /><Metric label="CiteScore" value={journal.citeScore} note="Scopus 2024" /></div><div className="pt-9"><div className="flex items-end justify-between"><div><div className="ji-kicker mono text-[10px] uppercase tracking-[.15em]">Five-year view</div><h2 className="ji-heading mt-2 text-2xl font-semibold">Metric history</h2></div><span className="ji-muted text-[11px]">2020 — 2024</span></div><HistoryChart history={journal.history} /></div><ManuscriptList journal={journal} /></div></section>
   </main></Shell>;
 }
 
