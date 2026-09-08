@@ -180,7 +180,7 @@ function HistoryChart({ history }: { history: Journal['history'] }) {
 
 function ManuscriptList({ journal }: { journal: Journal }) {
   const manuscripts = manuscriptsByJournal[journal.id] ?? [
-    { title: `${journal.subjects[0]} perspectives in ${journal.title}`, authors: `Editorial record · ${journal.publisher}`, year: '2024', volume: '1', issue: '1', type: 'Research article', citations: 12 },
+    { title: `${journal.subjects[0]} perspectives in ${journal.title}`, authors: 'A. Rahman, M. Chen, S. Hart', year: '2024', volume: '1', issue: '1', type: 'Research article', citations: 12 },
     { title: `Recent advances in ${journal.subjects.join(' and ').toLowerCase()}`, authors: `Research contributors · ${journal.country}`, year: '2023', volume: '1', issue: '1', type: 'Review article', citations: 9 },
     { title: `Methods and evidence for contemporary ${journal.subjects[0].toLowerCase()} research`, authors: 'Indexed contributors', year: '2023', volume: '1', issue: '1', type: 'Research article', citations: 7 },
   ];
